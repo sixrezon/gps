@@ -20,7 +20,7 @@ import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
 
-    public String lat, lon;
+    public String lat, lon, acc;
     TextView tv_lat, tv_lon, tv_acc, tv_result;
     Button btn_update, btn_write;
     public String[] result = new String[15];
@@ -52,17 +52,19 @@ public class MainActivity extends AppCompatActivity {
             GPSClass g = new GPSClass(getApplicationContext());
             Location l = g.getLocation();
             if (l != null) {
-                double x = l.getLatitude();
-                double y = l.getLongitude();
+                double latitude = l.getLatitude();
+                double longitude = l.getLongitude();
+                double accuracy = l.getAccuracy();
 
                 DecimalFormatSymbols otherSymbols = new DecimalFormatSymbols(Locale.US);
                 DecimalFormat df = new DecimalFormat("###.000000", otherSymbols);
-                lat = df.format(x);
-                lon = df.format(y);
+                lat = df.format(latitude);
+                lon = df.format(longitude);
+                acc = Double.toString(accuracy);
 
                 tv_lat.setText(lat);
                 tv_lon.setText(lon);
-                tv_acc.setText(" " + l.getAccuracy());
+                tv_acc.setText(acc);
 
                 if (l.getAccuracy() < 5) {
                     tv_acc.setTextColor(Color.GREEN);
@@ -73,18 +75,26 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(getApplicationContext(), "Обновление", Toast.LENGTH_SHORT).show();
         });
         btn_write.setOnClickListener(v -> {
-            result[j] = (j + 1) + ". " + lat + "; " + lon + "\n";
-            j++;
-            StringBuilder stringBuilder = new StringBuilder();
-            for (String s : result) {
-                stringBuilder.append(s);
-            }
-            String result_2 = stringBuilder.toString();
-            tv_result.setText(result_2);
-            if (j == 15) {
-                j = 0;
-                Arrays.fill(result, ""); //есть выведено 5 строк, то обнуление
+            if(lat!=null && lon!=null) {
+                out_coordinate();
+            } else{
+                Toast.makeText(getApplicationContext(), "Координаты не найдены!", Toast.LENGTH_SHORT).show();
             }
         });
+    }
+    public void out_coordinate(){
+        result[j] = (j + 1) + ". " + lat + "; " + lon + "\n";
+        j++;
+        StringBuilder stringBuilder = new StringBuilder();
+        for (String s : result) {
+            stringBuilder.append(s);
+        }
+        String result_2 = stringBuilder.toString();
+        tv_result.setText(result_2);
+
+        if (j == 15) {
+            j = 0;
+            Arrays.fill(result, ""); //есть выведено 5 строк, то обнуление
+        }
     }
 }
